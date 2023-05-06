@@ -3,12 +3,10 @@
 #include <semaphore.h>
 
 #define GROUP_SIZE 4
-sem_t barrier;
+pthread_barrier_t barrier;
 sem_t state_mutex;
-int hackers;
-sem_t hackerQueue;
-int serfs;
-sem_t serfQueue;
+int groups[2] = {0,0};
+sem_t queues[2];	
 
 typedef enum { false, true } bool;
 
@@ -18,25 +16,29 @@ void sem_post_n(sem_t* sem,int n) {
 	}
 }
 
-void* hacker_thread(void* arg) {
+void* generic_thread(void* arg) {
 	bool is_captain = false;
+	int type = *((char*)arg);
+	int r_type = (type + 1) % 2;
 
-	printf("waiting to join\n");
-	sem_wait(&state_mutex);
+	if (sem_trywait(&state_mutex) != 0) {	
+		printf("waiting to join\n");
+		sem_wait(&state_mutex);
+	}
 	printf("looking for group\n");
-	hackers += 1;
-	if(hackers == GROUP_SIZE){
+	groups[type] += 1;
+	if (groups[type] == GROUP_SIZE) {
 		printf("found group\n");
-		sem_post_n(&hackerQueue, GROUP_SIZE);
-		hackers = 0;
+		sem_post_n(&(queues[type]), GROUP_SIZE);
+		groups[type] = 0;
 		is_captain = true;
 	}
-	else if (hackers == GROUP_SIZE/2 && serfs >= GROUP_SIZE/2) {
+	else if (groups[type] == GROUP_SIZE / 2 && groups[r_type] >= GROUP_SIZE / 2) {
 		printf("found group\n");
-		sem_post_n(&hackerQueue, GROUP_SIZE / 2);
-		sem_post_n(&serfQueue, GROUP_SIZE / 2);
-		serfs -= 2;
-		hackers = 0;
+		sem_post_n(&(queues[type]), GROUP_SIZE / 2);
+		sem_post_n(&(queues[r_type]), GROUP_SIZE / 2);
+		groups[r_type] -= GROUP_SIZE/2;
+		groups[type] = 0;
 		is_captain = true;
 	}
 	else {
@@ -44,10 +46,10 @@ void* hacker_thread(void* arg) {
 		sem_post(&state_mutex);
 	}
 
-	sem_wait(&hackerQueue);
+	sem_wait(&(queues[type]));
 	printf("boarding\n");
 
-	sem_wait(&barrier);
+	pthread_barrier_wait(&barrier);
 
 	if (is_captain) {
 		printf("rowing\n");
@@ -57,56 +59,19 @@ void* hacker_thread(void* arg) {
 	return NULL;
 }
 
-void* serf_thread(void* arg) {
-	bool is_captain = false;
-
-	sem_wait(&state_mutex);
-	serfs += 1;
-	if (serfs == GROUP_SIZE) {
-		printf("found group\n");
-		sem_post_n(&serfQueue, GROUP_SIZE);
-		serfs = 0;
-		is_captain = true;
-	}
-	else if (serfs == GROUP_SIZE / 2 && hackers >= GROUP_SIZE / 2) {
-		printf("found group\n");
-		sem_post_n(&hackerQueue, GROUP_SIZE / 2);
-		sem_post_n(&serfQueue, GROUP_SIZE / 2);
-		serfs = 0;
-		hackers -= 2;
-		is_captain = true;
-	}
-	else {
-		printf("didn't find group\n");
-		sem_post(&state_mutex);
-	}
-
-	sem_wait(&serfQueue);
-	printf("boarding\n");
-
-	sem_wait(&barrier);
-	if (is_captain) {
-		printf("rowing\n");
-		sem_post(&state_mutex);
-	}
-
-	return NULL;
-}
-
-
-void init_semaphores() {
+void init_structs() {
 	sem_init(&state_mutex, 0, 1);
-	sem_init(&barrier, 0, GROUP_SIZE);
-	sem_init(&hackerQueue, 0, 0);
-	sem_init(&serfQueue, 0, 0);
+	pthread_barrier_init(&barrier, NULL, GROUP_SIZE);
+	sem_init(&(queues[0]), 0, 0);
+	sem_init(&(queues[1]), 0, 0);
 
 }
 
-void destroy_semaphores() {
+void destroy_structs() {
 	sem_destroy(&state_mutex);
-	sem_destroy(&barrier);
-	sem_destroy(&hackerQueue);
-	sem_destroy(&serfQueue);
+	pthread_barrier_destroy(&barrier);
+	sem_destroy(&(queues[0]));
+	sem_destroy(&(queues[1]));
 }
 
 
@@ -114,10 +79,11 @@ int main() {
 	init_semaphores();
 
 	pthread_t t1,t2,t3,t4;
-	pthread_create(&t1, NULL, hacker_thread, NULL);
-	pthread_create(&t2, NULL, hacker_thread, NULL);
-	pthread_create(&t3, NULL, hacker_thread, NULL);
-	pthread_create(&t4, NULL, hacker_thread, NULL);
+	int type = 0;
+	pthread_create(&t1, NULL, generic_thread, &type);
+	pthread_create(&t2, NULL, generic_thread, &type);
+	pthread_create(&t3, NULL, generic_thread, &type);
+	pthread_create(&t4, NULL, generic_thread, &type);
 
 	pthread_join(t1,NULL);
 	pthread_join(t2, NULL);
