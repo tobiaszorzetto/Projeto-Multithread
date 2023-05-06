@@ -76,7 +76,7 @@ void destroy_structs() {
 
 
 int main() {
-	init_strucs();
+	init_structs();
 
 	pthread_t t1,t2,t3,t4;
 	int type = 0;
@@ -90,6 +90,6 @@ int main() {
 	pthread_join(t3, NULL);
 	pthread_join(t4, NULL);
 
-	destroy_strucs();
+	destroy_structs();
 	return 0;
 }
