@@ -1,3 +1,4 @@
+#pragma once
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -45,9 +46,9 @@
 	}\
 }
 
-pthread_barrier_t barrier;
-sem_t state_mutex;
-sem_t queues[2];
+extern pthread_barrier_t barrier;
+extern sem_t state_mutex;
+extern sem_t queues[2];
 
 
 void sem_post_n(sem_t* sem, int n);
