@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "helper.h"
+#include "animation.h"
 
 typedef struct {
 	int type;
 	int* groups;
+	Fila* fila;
+
 }t_args;
 
 void* generic_thread(void* arg);
