@@ -1,6 +1,9 @@
 #include <pthread.h>
 #include "helper.h"
 #include "person.h"
+#include "animation.h"
+
+Fila* filaAnimation= initQueue();
 
 int main() {
 	init_structs();
@@ -8,10 +11,10 @@ int main() {
 
 	pthread_t t1,t2,t3,t4;
 
-	t1 = create_person(SERF, groups);
-	t2 = create_person(SERF, groups);
-	t3 = create_person(HACKER, groups);
-	t4 = create_person(HACKER, groups);
+	t1 = create_person(SERF, groups, filaAnimation);
+	t2 = create_person(SERF, groups, filaAnimation);
+	t3 = create_person(HACKER, groups, filaAnimation);
+	t4 = create_person(HACKER, groups, filaAnimation);
 
 	pthread_join(t1,NULL);
 	pthread_join(t2, NULL);

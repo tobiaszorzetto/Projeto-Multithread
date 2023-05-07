@@ -1,0 +1,194 @@
+#include "animation.h"
+
+void animate(int animation_type, Fila *fila)
+{
+    enQueue(animation_type, fila);
+    /*switch(animation_type)
+    {
+        case WAITING:
+            fila
+            break;
+        case LOOKING:
+            printf("looking for group\n");
+            break;
+        case FOUND_GROUP:
+            printf("found group\n");
+            break;
+        case NOT_FOUND_GROUP:
+            printf("didn't find group\n");
+            break;\
+        case BOARDING:
+            printf("boarding\n");
+            break;
+        case ROWING:
+            printf("rowing\n");
+            break;
+        default:
+            break;
+    }\*/
+}
+
+void *runAnimation(void *args)
+{
+    t_args params = *((t_args *)arg);
+    int *groups = params.groups;
+
+    Fila *fila = params.fila;
+
+    int type = params.type;
+
+    Fila *fila = (Fila *)args;
+    int value;
+    while (fila->front != -1)
+    {
+        value = deQueue(fila);
+        switch (value)
+        {
+        case LOOKING:
+            formQueue();
+            break;
+        case ROWING:
+            runBoat();
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void enQueue(int value, Fila *fila)
+{
+    if (fila->front == -1)
+        fila->front = 0;
+    fila->rear++;
+    fila->items[fila->rear] = value;
+}
+
+int deQueue(Fila *fila)
+{
+    if (fila->front == -1)
+        return -1;
+    else
+    {
+        int aux = fila->items[fila->front];
+        fila->front++;
+        if (fila->front > fila->rear)
+            fila->front = fila->rear = -1;
+        return aux;
+    }
+}
+
+Fila *initQueue()
+{
+    Fila *fila = (Fila *)malloc(sizeof(Fila));
+    fila->front = -1;
+    fila->rear = -1;
+    return fila;
+}
+
+char *getBoat(int *groups, int *groupsAntigo)
+{
+    char *barco = (char *)malloc(MAX_BOAT_SIZE);
+    barco[0] = '<';
+    for (int i = 1; i < MAX_BOAT_SIZE; i++)
+    {
+        barco[i] = ' ';
+    }
+    for (int i = 0; i < groupsAntigo[0] - groups[0]; i++)
+    {
+        barco[i * 2 + 2] = 'H';
+    }
+    for (int i = groupsAntigo[0] - groups[0]; i < groupsAntigo[0] - groups[0] + groupsAntigo[1] - groups[1]; i++)
+    {
+        barco[i * 2 + 2] = 'M';
+    }
+    barco[(groupsAntigo[0] - groups[0] + groupsAntigo[1] - groups[1]) * 2 + 2] = '>';
+    return barco;
+}
+
+char *getQueue(int *groups, int type)
+{
+    char typeChar;
+    if (type == 0)
+    {
+        typeChar = 'H';
+    }
+    else
+    {
+        typeChar = 'M';
+    }
+    char *fila = (char *)malloc(MAX_BOAT_SIZE);
+    for (int i = 0; i < MAX_BOAT_SIZE; i++)
+    {
+        fila[i] = ' ';
+    }
+    for (int i = 0; i < groups[type]; i++)
+    {
+        fila[i * 2] = typeChar;
+    }
+    return fila;
+}
+//   O
+//  /|\H
+//  /
+void runBoat()
+{
+    initscr();
+    int groupsAntigo[2] = {4, 4};
+    int groups[2] = {2, 2};
+    int posx = 0, posy = 0;
+    time_t oldTime = time(NULL), currTime;
+    char *boat = getBoat(groups, groupsAntigo);
+
+    while (posx == strlen("______________________________________________________________________________________________________________") - 3)
+    {
+        mvprintw(0, 0, "%s", getQueue(groups, 0));
+        mvprintw(1, 0, "______________________________________________________________________________________________________________");
+        mvprintw(3, posy, "                  ~                     ~                     ~                         ~                     ");
+        mvprintw(4, posx, "%s", boat);
+        mvprintw(6, !posy, "                  ~                     ~                     ~                         ~                     ");
+        mvprintw(7, 0, "______________________________________________________________________________________________________________");
+        mvprintw(8, 0, "%s", getQueue(groups, 1));
+        currTime = time(NULL);
+        if (currTime - oldTime == 1)
+        {
+            oldTime = currTime;
+            posy = !posy;
+        }
+        posx++;
+        usleep(50000);
+        refresh();
+        clear();
+    }
+    refresh();
+    endwin();
+
+    return;
+}
+
+int formQueue()
+{
+    initscr();
+    int groups[2] = {2, 2};
+    int posx = 0;
+    int posy = 0;
+
+    for (int i = 0; i < 4; i++)
+    {
+        mvprintw(0, 0, "%s", getQueue(groups, 0));
+        mvprintw(1, 0, "______________________________________________________________________________________________________________");
+        mvprintw(3, posy, "                  ~                     ~                     ~                         ~                     ");
+        posy = !posy;
+        mvprintw(6, posy, "                  ~                     ~                     ~                         ~                     ");
+        mvprintw(7, 0, "______________________________________________________________________________________________________________");
+        mvprintw(8, 0, "%s", getQueue(groups, 1));
+        posx++;
+        sleep(1);
+        refresh();
+        clear();
+    }
+    refresh();
+    endwin();
+
+    return 0;
+}
