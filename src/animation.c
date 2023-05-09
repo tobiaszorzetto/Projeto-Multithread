@@ -1,32 +1,5 @@
 #include "animation.h"
-
-void animate(int animation_type, Fila *fila)
-{
-    enQueue(animation_type, fila);
-    /*switch(animation_type)
-    {
-        case WAITING:
-            fila
-            break;
-        case LOOKING:
-            printf("looking for group\n");
-            break;
-        case FOUND_GROUP:
-            printf("found group\n");
-            break;
-        case NOT_FOUND_GROUP:
-            printf("didn't find group\n");
-            break;\
-        case BOARDING:
-            printf("boarding\n");
-            break;
-        case ROWING:
-            printf("rowing\n");
-            break;
-        default:
-            break;
-    }\*/
-}
+/*
 
 void *runAnimation(void *args)
 {
@@ -54,36 +27,6 @@ void *runAnimation(void *args)
             break;
         }
     }
-}
-
-void enQueue(int value, Fila *fila)
-{
-    if (fila->front == -1)
-        fila->front = 0;
-    fila->rear++;
-    fila->items[fila->rear] = value;
-}
-
-int deQueue(Fila *fila)
-{
-    if (fila->front == -1)
-        return -1;
-    else
-    {
-        int aux = fila->items[fila->front];
-        fila->front++;
-        if (fila->front > fila->rear)
-            fila->front = fila->rear = -1;
-        return aux;
-    }
-}
-
-Fila *initQueue()
-{
-    Fila *fila = (Fila *)malloc(sizeof(Fila));
-    fila->front = -1;
-    fila->rear = -1;
-    return fila;
 }
 
 char *getBoat(int *groups, int *groupsAntigo)
@@ -192,3 +135,4 @@ int formQueue()
 
     return 0;
 }
+*/

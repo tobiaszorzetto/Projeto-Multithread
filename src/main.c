@@ -1,26 +1,17 @@
-#include <pthread.h>
-#include "helper.h"
-#include "person.h"
-#include "animation.h"
+#include "state.h"
+#include "threads.h"
 
-Fila* filaAnimation= initQueue();
+
 
 int main() {
-	init_structs();
-	int groups[2] = { 0,0 };
+	init_State(4,3, 0.25, 0.5, 0.25);
+	init_threads_infrastructure();
 
-	pthread_t t1,t2,t3,t4;
+    create_person_thread(1);
+    create_person_thread(1);
+    create_person_thread(2);
+    create_person_thread(2);
+    join_all_person_threads();
 
-	t1 = create_person(SERF, groups, filaAnimation);
-	t2 = create_person(SERF, groups, filaAnimation);
-	t3 = create_person(HACKER, groups, filaAnimation);
-	t4 = create_person(HACKER, groups, filaAnimation);
-
-	pthread_join(t1,NULL);
-	pthread_join(t2, NULL);
-	pthread_join(t3, NULL);
-	pthread_join(t4, NULL);
-
-	destroy_structs();
 	return 0;
 }

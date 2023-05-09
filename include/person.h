@@ -1,18 +1,14 @@
 #pragma once
-#include <stdio.h>
 #include <stdlib.h>
-#include "helper.h"
-#include "animation.h"
+#include <pthread.h>
+#include <semaphore.h>
 
-typedef struct {
-	int type;
-	int* groups;
-	Fila* fila;
+typedef struct{
+    int type;
+    sem_t system_permission;
+    sem_t r_system_permission;
+    pthread_barrier_t* group_barrier;
+}Person;
 
-}t_args;
+Person* new_person();
 
-void* generic_thread(void* arg);
-
-t_args* new_t_args(int type, int* groups);
-
-pthread_t create_person(int type, int* groups);

@@ -19,8 +19,6 @@
 #define ROWING 5
 
 
-
-
 extern pthread_barrier_t barrier;
 extern sem_t state_mutex;
 extern sem_t queues[2];

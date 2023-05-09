@@ -1,32 +1,17 @@
-#ifndef animationh
+#pragma once
 
-#define animationh
+#include "queue.h"
+#include "person.h"
+#include <string.h>
+/*
+#define MAX_BOAT_SIZE 50
 
-#include "helper.h"
+void animate(int animation_type, Queue* fila);
 
-#define MAX_ANIMATION_SIZE 100
+void* runAnimation(void* args);
 
-typedef struct Fila
-{
-	int items[MAX_ANIMATION_SIZE];
-	int front;
-	int rear;
-} Fila;
-
-void enQueue(int animation_type, Fila* fila);
-
-int deQueue(Fila* fila);
-
-Fila* initQueue();
-
-void runBoat();
-char* getQueue(int* groups, int type);
 char* getBoat(int* groups, int* groupsAntigo);
+char* getQueue(int* groups, int type);
+void runBoat();
 int formQueue();
-
-void animate(int animation_type, Fila* fila);
-
-#endif
-
-
-
+*/
