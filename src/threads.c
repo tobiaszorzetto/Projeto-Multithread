@@ -32,13 +32,19 @@ void* t_person(void* args){
     Person* p = (Person*) args;
 
     join_system(p);
+    printf("in waiting line\n");
+    fflush(stdout);
     sem_wait(&(p->system_permission));
+    
+    printf("looking for group\n");
+    fflush(stdout);
     
     try_to_find_group(p);
     
     sem_post(&(p->r_system_permission));
     sem_wait(&(p->system_permission));    
     printf("person of type %d boarding\n", p->type);
+    fflush(stdout);
 
     pthread_barrier_wait(p->group_barrier);
     delete_person(p);
