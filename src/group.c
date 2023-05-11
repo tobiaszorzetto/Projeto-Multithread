@@ -9,3 +9,10 @@ Group* new_group(int size){
     pthread_barrier_init(&(g->barrier), NULL, size+1);
     return g;
 }
+
+void delete_group(Group* g){
+    free(g->participants);
+    sem_destroy(&(g->system_permission));
+    pthread_barrier_destroy(&(g->barrier));
+    free(g);    
+}

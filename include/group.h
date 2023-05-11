@@ -13,3 +13,5 @@ typedef struct{
 }Group;
 
 Group* new_group(int size);
+
+void delete_group(Group* g);

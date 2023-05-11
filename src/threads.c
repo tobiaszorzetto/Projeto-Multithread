@@ -24,6 +24,7 @@ void* t_manage_groups_queue(void* args){
 
         pthread_barrier_wait(&(g->barrier));
         printf("rowing\n");
+        delete_group(g);
     }
 }
 
@@ -40,6 +41,7 @@ void* t_person(void* args){
     printf("person of type %d boarding\n", p->type);
 
     pthread_barrier_wait(p->group_barrier);
+    delete_person(p);
     return NULL;
 }
 

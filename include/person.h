@@ -12,3 +12,5 @@ typedef struct{
 
 Person* new_person();
 
+void delete_person(Person* p);
+
