@@ -3,6 +3,7 @@
 #include "group.h"
 #include "state.h"
 #include "queue.h"
+#include "grouping_algorithm.h"
 #include <semaphore.h>
 #include <stdlib.h>
 #include <stdio.h>

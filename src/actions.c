@@ -1,17 +1,4 @@
 #include "actions.h"
-#define try_group_size(i,type, num_current_group,testing,group) (\
-{\
-    for(int j=0; j<global_state->num_groups; j++){\
-            if(num_current_group==global_state->group_size){break;}\
-            if(j==type){continue;}\
-            if(global_state->individuals_queue[j]->size >=i){\
-                num_current_group +=i;\
-                if(testing==0){\
-                    send_n_to_group(i,global_state->individuals_queue[j],group);\
-                }\
-            }\
-    }\
-})
 
 void join_system(Person* p){
     sem_wait(&(global_state->join_waiting_queue_sem));
@@ -35,30 +22,34 @@ void send_n_to_group(int n, Queue* q, Group* g){
 
 void try_to_find_group(Person* p){
     int type = p->type;
-    int starting_point = global_state->group_size > (global_state->individuals_queue[type]->size+1) ? global_state->individuals_queue[type]->size+1 : global_state->group_size;
-    int found_group = 0;
-    for(int i=starting_point; i>0; i--){
-        if(global_state->group_size%i!=0){ continue;}
-        
-        int num_current_group = i;
-        try_group_size(i,type,num_current_group, 1, NULL);
+    int* queue_sizes = (int*) malloc(sizeof(int) * global_state->num_groups);
+    int* valid_group = (int*) malloc(sizeof(int) * global_state->num_groups);
+    for(int i=0; i<global_state->num_groups; i++){
+        queue_sizes[i] = global_state->individuals_queue[i]->size;
+        valid_group[i] = 0;
+    }
+    queue_sizes[type] +=1;
+    
+    int found_group = find_group(global_state->group_size, type,\
+                        queue_sizes, global_state->group_proportions,\
+                        global_state->num_groups, valid_group, type);
 
-        if(num_current_group==global_state->group_size){
-            found_group =1;
-            num_current_group = i;
-            Group* g = new_group(global_state->group_size);
-            join_group(p, g);
-            send_n_to_group(i-1,global_state->individuals_queue[type],g);
-            try_group_size(i,type,num_current_group, 0, g);
-            
-            enqueue(g, global_state->groups_queue);
-            sem_post(&(global_state->groups_queue_sem));
-            break;
+    if(found_group == 1){
+        Group* g = new_group(global_state->group_size);
+        join_group(p, g);
+        send_n_to_group(valid_group[type]-1,global_state->individuals_queue[type],g);
+        for(int i=0; i<global_state->num_groups; i++){
+            if(i == type){continue;}
+            send_n_to_group(valid_group[i], global_state->individuals_queue[i], g);
         }
 
+        enqueue(g, global_state->groups_queue);
+        sem_post(&(global_state->groups_queue_sem));
     }
-    if(!found_group){
+    else{
         enqueue(p, global_state->individuals_queue[type]);
     }
+    free(queue_sizes);
+    free(valid_group);
     
 }
