@@ -6,10 +6,10 @@ ODIR=obj
 
 LIBS=-lncurses
 
-_DEPS = actions.h group.h grouping_algorithm.h person.h queue.h state.h threads.h animation.h
+_DEPS = actions.h change.h group.h grouping_algorithm.h person.h publisher.h queue.h state.h threads.h animation.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = actions.o group.o grouping_algorithm.o person.o queue.o main.o state.o threads.o animation.o
+_OBJ = actions.o change.o group.o grouping_algorithm.o person.o publisher.o queue.o main.o state.o threads.o animation.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

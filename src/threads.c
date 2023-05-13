@@ -5,7 +5,8 @@ Queue* person_threads;
 void* t_manage_waiting_queue(void* args){
     while(1){
         sem_wait(&(global_state->waiting_queue_sem));
-        Person* p = dequeue(global_state->waiting_queue);
+        Person* p = dequeue_publisher_wrapper(global_state->waiting_queue,\
+                                              global_state->waiting_queue_publisher);
         sem_post(&(p->system_permission));
 
         sem_wait(&(p->r_system_permission)); 
@@ -15,7 +16,8 @@ void* t_manage_waiting_queue(void* args){
 void* t_manage_groups_queue(void* args){
     while(1){
         sem_wait(&(global_state->groups_queue_sem));
-        Group* g = dequeue(global_state->groups_queue);
+        Group* g = dequeue_publisher_wrapper(global_state->groups_queue,\
+                                              global_state->groups_queue_publisher);
         
         for(int i=0; i<g->size; i++){
             Person* p = g->participants[i];
@@ -23,7 +25,6 @@ void* t_manage_groups_queue(void* args){
         }
 
         pthread_barrier_wait(&(g->barrier));
-        printf("rowing\n");
         delete_group(g);
     }
 }
@@ -32,19 +33,12 @@ void* t_person(void* args){
     Person* p = (Person*) args;
 
     join_system(p);
-    printf("in waiting line\n");
-    fflush(stdout);
     sem_wait(&(p->system_permission));
-    
-    printf("looking for group\n");
-    fflush(stdout);
     
     try_to_find_group(p);
     
     sem_post(&(p->r_system_permission));
-    sem_wait(&(p->system_permission));    
-    printf("person of type %d boarding\n", p->type);
-    fflush(stdout);
+    sem_wait(&(p->system_permission));
 
     pthread_barrier_wait(p->group_barrier);
     delete_person(p);

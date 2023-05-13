@@ -2,7 +2,14 @@
 
 void join_system(Person* p){
     sem_wait(&(global_state->join_waiting_queue_sem));
+
+    enqueue_publisher_wrapper(global_state->waiting_queue,global_state->waiting_queue_publisher, p);
+    /*
     enqueue(p, global_state->waiting_queue);
+    Queue_change* q_c = new_queue_change(global_state->waiting_queue,1,p);
+    publish(global_state->waiting_queue_puqblisher, q_c);
+    */
+
     sem_post(&(global_state->join_waiting_queue_sem));
     sem_post(&(global_state->waiting_queue_sem));
 }
@@ -13,9 +20,15 @@ void join_group(Person* p, Group* g){
     p->group_barrier = &(g->barrier);
 }
 
-void send_n_to_group(int n, Queue* q, Group* g){
+void send_n_to_group(int n, Queue* q, Group* g, Publisher* pub){
     for(int i=0;i<n;i++){
+        Person* p = dequeue_publisher_wrapper(q, pub);
+        /*
         Person* p = dequeue(q);
+        Queue_change* q_c = new_queue_change(q,-1,p);
+        publish(pub, q_c);
+        */
+
         join_group(p,g);
     }
 }
@@ -30,24 +43,47 @@ void try_to_find_group(Person* p){
     }
     queue_sizes[type] +=1;
     
-    int found_group = find_group(global_state->group_size, type,\
-                        queue_sizes, global_state->group_proportions,\
-                        global_state->num_groups, valid_group, type);
+    int found_group = find_group(global_state->group_size,\
+                                 type,\
+                                 queue_sizes,\
+                                 global_state->group_proportions,\
+                                 global_state->num_groups,\
+                                 valid_group,\
+                                 type);
 
     if(found_group == 1){
         Group* g = new_group(global_state->group_size);
         join_group(p, g);
-        send_n_to_group(valid_group[type]-1,global_state->individuals_queue[type],g);
+        send_n_to_group(valid_group[type]-1,\
+                        global_state->individuals_queue[type],\
+                        g,
+                        global_state->individuals_queue_publishers[type]);
+
         for(int i=0; i<global_state->num_groups; i++){
             if(i == type){continue;}
-            send_n_to_group(valid_group[i], global_state->individuals_queue[i], g);
+            send_n_to_group(valid_group[i],\
+                            global_state->individuals_queue[i],\
+                            g,
+                            global_state->individuals_queue_publishers[i]);
         }
 
+    /*
         enqueue(g, global_state->groups_queue);
+        Queue_change* q_c = new_queue_change(global_state->groups_queue1,1,g);
+        publish(global_state->groups_queue_publisher, q_c);
+    */
+
+        enqueue_publisher_wrapper( global_state->groups_queue,\
+                                   global_state->groups_queue_publisher,\
+                                   g);
+
         sem_post(&(global_state->groups_queue_sem));
     }
     else{
-        enqueue(p, global_state->individuals_queue[type]);
+        enqueue_publisher_wrapper( global_state->individuals_queue[type],\
+                                   global_state->individuals_queue_publishers[type],\
+                                   p);
+
     }
     free(queue_sizes);
     free(valid_group);

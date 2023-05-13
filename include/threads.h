@@ -1,5 +1,6 @@
 #pragma once
 #include "queue.h"
+#include "change.h"
 #include "person.h"
 #include "group.h"
 #include "state.h"

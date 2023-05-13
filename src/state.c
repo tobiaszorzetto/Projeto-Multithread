@@ -2,6 +2,12 @@
 
 State* global_state;
 
+void set_up_state_queue(Queue** q, sem_t* q_sem, Publisher** pub){
+    sem_init(q_sem,0,0);
+    (*q) = new_queue(10);
+    (*pub) = new_publisher();
+}
+
 void init_State(int group_size, int num_groups, ...){
     global_state = (State *) malloc(sizeof(State));
 
@@ -18,20 +24,25 @@ void init_State(int group_size, int num_groups, ...){
     va_end(ptr);
 
     //setting up queues
-
     sem_init(&(global_state->join_waiting_queue_sem),0,1);
-    sem_init(&(global_state->waiting_queue_sem),0,0);
-    global_state->waiting_queue = new_queue(10);
+    set_up_state_queue(&(global_state->waiting_queue),\
+                       &(global_state->waiting_queue_sem),\
+                       &(global_state->waiting_queue_publisher));
+
 
     global_state->individuals_queue = (Queue**)malloc(sizeof(Queue*)*num_groups);
     global_state->individuals_queue_sems = (sem_t*)malloc(sizeof(sem_t)*num_groups);
+    global_state->individuals_queue_publishers = (Publisher**) malloc(sizeof(Publisher*)*num_groups);
+
     for(int i=0; i<num_groups;i++){
-        global_state->individuals_queue[i] = new_queue(10);
-        sem_init(&(global_state->individuals_queue_sems[i]),0,0);
+        set_up_state_queue(&(global_state->individuals_queue[i]),\
+                           &(global_state->individuals_queue_sems[i]),\
+                           &(global_state->individuals_queue_publishers[i]));
     }
 
-    sem_init(&(global_state->groups_queue_sem),0,0);
-    global_state->groups_queue = new_queue(10);
+    set_up_state_queue(&(global_state->groups_queue),\
+                       &(global_state->groups_queue_sem),\
+                       &(global_state->groups_queue_publisher));
 
     sem_init(&(global_state->main_sem),0,0);
 }
