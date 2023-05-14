@@ -57,7 +57,7 @@ void init_threads_infrastructure(){
     pthread_create(&tw, NULL, t_manage_waiting_queue, NULL);
     pthread_create(&tg, NULL, t_manage_groups_queue, NULL);
 
-    person_threads = new_queue(20);
+    person_threads = new_queue(MAX_NUM_PERSON_THREADS);
 }
 
 void join_all_person_threads(){

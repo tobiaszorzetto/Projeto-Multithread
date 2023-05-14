@@ -4,11 +4,6 @@ void join_system(Person* p){
     sem_wait(&(global_state->join_waiting_queue_sem));
 
     enqueue_publisher_wrapper(global_state->waiting_queue,global_state->waiting_queue_publisher, p);
-    /*
-    enqueue(p, global_state->waiting_queue);
-    Queue_change* q_c = new_queue_change(global_state->waiting_queue,1,p);
-    publish(global_state->waiting_queue_puqblisher, q_c);
-    */
 
     sem_post(&(global_state->join_waiting_queue_sem));
     sem_post(&(global_state->waiting_queue_sem));
@@ -23,11 +18,6 @@ void join_group(Person* p, Group* g){
 void send_n_to_group(int n, Queue* q, Group* g, Publisher* pub){
     for(int i=0;i<n;i++){
         Person* p = dequeue_publisher_wrapper(q, pub);
-        /*
-        Person* p = dequeue(q);
-        Queue_change* q_c = new_queue_change(q,-1,p);
-        publish(pub, q_c);
-        */
 
         join_group(p,g);
     }
@@ -66,12 +56,6 @@ void try_to_find_group(Person* p){
                             g,
                             global_state->individuals_queue_publishers[i]);
         }
-
-    /*
-        enqueue(g, global_state->groups_queue);
-        Queue_change* q_c = new_queue_change(global_state->groups_queue1,1,g);
-        publish(global_state->groups_queue_publisher, q_c);
-    */
 
         enqueue_publisher_wrapper( global_state->groups_queue,\
                                    global_state->groups_queue_publisher,\

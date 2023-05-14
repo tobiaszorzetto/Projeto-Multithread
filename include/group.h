@@ -14,4 +14,5 @@ typedef struct{
 
 Group* new_group(int size);
 
+//simple function to free the memory allocated for a given group
 void delete_group(Group* g);

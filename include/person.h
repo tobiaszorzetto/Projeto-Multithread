@@ -12,5 +12,6 @@ typedef struct{
 
 Person* new_person();
 
+//simple function to free the memory allocated for a given person
 void delete_person(Person* p);
 
