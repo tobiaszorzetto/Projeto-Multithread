@@ -3,6 +3,7 @@
 #include "publisher.h"
 #include "change.h"
 #include "person.h"
+#include "animation.h"
 
 void waiting_queue(void* args){
     Queue_change* q_c = args;
@@ -20,10 +21,12 @@ void individuals_queue(void* args){
     Queue_change* q_c = args;
     if(q_c->diff == 1){
         printf("joined %d individuals queue\n",((Person*)q_c->diff_elem)->type);
+        drawQueue();
         fflush(stdout);
     }
     else{
         printf("left %d individuals queue\n",((Person*)q_c->diff_elem)->type);
+        drawQueue();
         fflush(stdout);
     }
 }
@@ -35,11 +38,10 @@ void groups_queue(void* args){
         fflush(stdout);
     }
     else{
-        printf("left gruops queue\n");
+        printf("left groups queue\n");
         fflush(stdout);
     }
 }
-
 
 int main() {
 	init_State(4,3, 0.25, 0.5, 0.25);

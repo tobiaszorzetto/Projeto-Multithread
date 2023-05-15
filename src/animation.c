@@ -1,5 +1,21 @@
 #include "animation.h"
-/*
+#include "state.h"
+
+
+void drawQueue() {
+    initscr();
+    char type = 'A';
+    int x=1, y=1;
+    for (int i = 0; i < global_state->num_groups; i++) {
+        for (int j = 0; j < global_state->individuals_queue[i]->size; j++) {
+            mvprintw(y, x, type);
+            refresh();
+            x += 2;
+        }
+        y+=2;
+        type += 1;
+    }
+}
 
 void *runAnimation(void *args)
 {
@@ -135,4 +151,3 @@ int formQueue()
 
     return 0;
 }
-*/
