@@ -4,6 +4,16 @@
 #include <stdarg.h>
 #include "queue.h"
 #include "publisher.h"
+#include "animation.h"
+
+typedef struct {
+    WINDOW *topMargin;
+    WINDOW *botMargin;
+    WINDOW *topWaves;
+    WINDOW *botWaves;
+    WINDOW *boatWin;
+    WINDOW *individualsQueueWin;
+} Windows;
 
 typedef struct{
     int group_size;
@@ -26,6 +36,8 @@ typedef struct{
 
     Queue* change_queue;// queue of Change
     sem_t main_sem;
+
+    Windows* windows; // animation windows
 }State;
 
 

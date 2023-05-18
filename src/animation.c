@@ -1,153 +1,121 @@
 #include "animation.h"
-#include "state.h"
 
-
-void drawQueue() {
-    initscr();
-    char type = 'A';
-    int x=1, y=1;
-    for (int i = 0; i < global_state->num_groups; i++) {
-        for (int j = 0; j < global_state->individuals_queue[i]->size; j++) {
-            mvprintw(y, x, type);
-            refresh();
-            x += 2;
-        }
-        y+=2;
-        type += 1;
-    }
-}
-
-void *runAnimation(void *args)
-{
-    t_args params = *((t_args *)arg);
-    int *groups = params.groups;
-
-    Fila *fila = params.fila;
-
-    int type = params.type;
-
-    Fila *fila = (Fila *)args;
-    int value;
-    while (fila->front != -1)
-    {
-        value = deQueue(fila);
-        switch (value)
-        {
-        case LOOKING:
-            formQueue();
-            break;
-        case ROWING:
-            runBoat();
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-char *getBoat(int *groups, int *groupsAntigo)
-{
-    char *barco = (char *)malloc(MAX_BOAT_SIZE);
-    barco[0] = '<';
-    for (int i = 1; i < MAX_BOAT_SIZE; i++)
-    {
-        barco[i] = ' ';
-    }
-    for (int i = 0; i < groupsAntigo[0] - groups[0]; i++)
-    {
-        barco[i * 2 + 2] = 'H';
-    }
-    for (int i = groupsAntigo[0] - groups[0]; i < groupsAntigo[0] - groups[0] + groupsAntigo[1] - groups[1]; i++)
-    {
-        barco[i * 2 + 2] = 'M';
-    }
-    barco[(groupsAntigo[0] - groups[0] + groupsAntigo[1] - groups[1]) * 2 + 2] = '>';
-    return barco;
-}
-
-char *getQueue(int *groups, int type)
-{
-    char typeChar;
-    if (type == 0)
-    {
-        typeChar = 'H';
-    }
-    else
-    {
-        typeChar = 'M';
-    }
-    char *fila = (char *)malloc(MAX_BOAT_SIZE);
-    for (int i = 0; i < MAX_BOAT_SIZE; i++)
-    {
-        fila[i] = ' ';
-    }
-    for (int i = 0; i < groups[type]; i++)
-    {
-        fila[i * 2] = typeChar;
-    }
-    return fila;
-}
-//   O
-//  /|\H
-//  /
-void runBoat()
-{
-    initscr();
-    int groupsAntigo[2] = {4, 4};
-    int groups[2] = {2, 2};
-    int posx = 0, posy = 0;
+void *moveWaves() {
+    int posx_wave = 0;
     time_t oldTime = time(NULL), currTime;
-    char *boat = getBoat(groups, groupsAntigo);
-
-    while (posx == strlen("______________________________________________________________________________________________________________") - 3)
-    {
-        mvprintw(0, 0, "%s", getQueue(groups, 0));
-        mvprintw(1, 0, "______________________________________________________________________________________________________________");
-        mvprintw(3, posy, "                  ~                     ~                     ~                         ~                     ");
-        mvprintw(4, posx, "%s", boat);
-        mvprintw(6, !posy, "                  ~                     ~                     ~                         ~                     ");
-        mvprintw(7, 0, "______________________________________________________________________________________________________________");
-        mvprintw(8, 0, "%s", getQueue(groups, 1));
+    char waves[] = "                  ~                     ~                     ~                         ~                     ";
+    while(1) {
         currTime = time(NULL);
         if (currTime - oldTime == 1)
         {
             oldTime = currTime;
-            posy = !posy;
+            posx_wave = !posx_wave;
+            mvwprintw(global_state->windows->topWaves, 0, posx_wave, "%s", waves);
+            mvwprintw(global_state->windows->botWaves, 0, !posx_wave, "%s", waves);
+            wrefresh(global_state->windows->topWaves);
+            wrefresh(global_state->windows->botWaves);
         }
-        posx++;
-        usleep(50000);
-        refresh();
-        clear();
     }
-    refresh();
-    endwin();
-
-    return;
 }
 
-int formQueue()
-{
-    initscr();
-    int groups[2] = {2, 2};
-    int posx = 0;
-    int posy = 0;
-
-    for (int i = 0; i < 4; i++)
-    {
-        mvprintw(0, 0, "%s", getQueue(groups, 0));
-        mvprintw(1, 0, "______________________________________________________________________________________________________________");
-        mvprintw(3, posy, "                  ~                     ~                     ~                         ~                     ");
-        posy = !posy;
-        mvprintw(6, posy, "                  ~                     ~                     ~                         ~                     ");
-        mvprintw(7, 0, "______________________________________________________________________________________________________________");
-        mvprintw(8, 0, "%s", getQueue(groups, 1));
-        posx++;
-        sleep(1);
-        refresh();
-        clear();
-    }
+void drawRiverMargins() {
+    global_state->windows->topMargin = newwin(1, WIN_WIDTH, TOP_MARGIN_POS, 0);
+    global_state->windows->botMargin = newwin(1, WIN_WIDTH, BOT_MARGIN_POS, 0);
     refresh();
-    endwin();
+    char margin[] = "______________________________________________________________________________________________________________";
+    mvwprintw(global_state->windows->topMargin, 0, 0, "%s", margin);
+    mvwprintw(global_state->windows->botMargin, 0, 0, "%s", margin);
+    wrefresh(global_state->windows->topMargin);
+    wrefresh(global_state->windows->botMargin);
+}
 
-    return 0;
+void drawWaves() {
+    global_state->windows->topWaves = newwin(1, WIN_WIDTH, TOP_MARGIN_POS+2, 0);
+    global_state->windows->botWaves = newwin(1, WIN_WIDTH, BOT_MARGIN_POS-2, 0);
+    refresh();
+    char waves[] = "                  ~                     ~                     ~                         ~                     ";
+    mvwprintw(global_state->windows->topWaves, 0, 0, "%s", waves);
+    mvwprintw(global_state->windows->botWaves, 0, 0, "%s", waves);
+    wrefresh(global_state->windows->topWaves);
+    wrefresh(global_state->windows->botWaves);
+}
+
+void initializeWindows() {
+    drawRiverMargins();
+    drawWaves();
+    global_state->windows->boatWin = newwin(1, WIN_WIDTH, (BOT_MARGIN_POS+TOP_MARGIN_POS)/2, 0);
+    global_state->windows->individualsQueueWin = newwin(20, WIN_WIDTH, BOT_MARGIN_POS + 2, 0);
+    refresh();
+}
+
+void drawQueue() {
+    for(int i = 0; i < global_state->num_groups; i++){   
+        mvwprintw(global_state->windows->individualsQueueWin, i, 0, "%s", getQueue(i));
+    }
+    wrefresh(global_state->windows->individualsQueueWin);
+}
+
+char *getBoat(Group* g)
+{
+    char *barco = (char *)malloc(MAX_BOAT_SIZE);
+    barco[0] = '<';
+
+    char s = 'A';
+
+    for (int i = 1; i < MAX_BOAT_SIZE; i++)
+    {
+        barco[i] = ' ';
+    }
+
+    for (int i = 0; i < g->size; i++)
+    {
+        barco[i * 2 + 2] = s + g->participants[i]->type;
+    }
+
+    barco[(g->size) * 2 + 2] = '>';
+    return barco;
+}
+
+char* getQueue(int type)
+{
+    char typeChar = 'A';
+    typeChar += type;
+    
+    char *fila = (char *)malloc(MAX_BOAT_SIZE + 2);
+    for (int i = 0; i < MAX_BOAT_SIZE; i++)
+    {
+        fila[i] = ' ';
+    }
+    fila[0] = typeChar;
+    fila[1] = ':';
+    fila[2] = ' ';
+    for (int i = 0; i < global_state->individuals_queue[type]->size; i++)
+    {
+        fila[i * 2 + 3] = typeChar;
+    }
+    return fila;
+}
+// //   O
+// //  /|\H
+// //  /
+void runBoat(Group* g)
+{
+    int posx = 0;
+    char *boat = getBoat(g);
+
+    while (posx != strlen("______________________________________________________________________________________________________________") - 3)
+    {
+        mvwprintw(global_state->windows->boatWin, 0, posx, "%s", boat);
+        wrefresh(global_state->windows->boatWin);
+        // wclear(global_state->windows->individualsQueueWin);
+        // // for(int i = 0; i < global_state->num_groups; i++){   
+        // //     mvwprintw(global_state->windows->individualsQueueWin, i, 0, "%s", getQueue(i));
+        // // }
+        // wrefresh(global_state->windows->individualsQueueWin);
+        
+        posx++;
+        usleep(50000);
+        wclear(global_state->windows->boatWin);
+    }
+    wrefresh(global_state->windows->boatWin);
 }

@@ -45,5 +45,7 @@ void init_State(int group_size, int num_groups, ...){
                        &(global_state->groups_queue_publisher));
 
     sem_init(&(global_state->main_sem),0,0);
+
+    global_state->windows = (Windows *) malloc(sizeof(Windows));
 }
 

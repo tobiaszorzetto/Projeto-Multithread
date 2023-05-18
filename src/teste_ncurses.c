@@ -1,7 +1,8 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <string.h>
-#include <cstdlib>
+// #include <cstdlib>
+#include <stdlib.h>
 #include <time.h>
 
 #define MAX_BOAT_SIZE 50
@@ -41,31 +42,33 @@ char* getQueue(int* groups, int type) {
 //   O
 //  /|\H
 //  /
-void runBoat(){	
-  initscr();			
+void runBoat(WINDOW *boatWin){	
+  // initscr();			
   int groupsAntigo[2] = {4,4};
   int groups[2] = {2,2};
   int posx = 0, posy = 0;
   time_t oldTime = time(NULL), currTime;
   char *boat = getBoat(groups, groupsAntigo); 
 
-  while(posx == strlen("______________________________________________________________________________________________________________") - 3) {
-    mvprintw(0,0, "%s", getQueue(groups, 0));
-    mvprintw(1,0, "______________________________________________________________________________________________________________");	
-    mvprintw(3,posy, "                  ~                     ~                     ~                         ~                     ");
-    mvprintw(4,posx, "%s", boat);
-    mvprintw(6,!posy, "                  ~                     ~                     ~                         ~                     ");
-    mvprintw(7,0, "______________________________________________________________________________________________________________");
-    mvprintw(8,0, "%s", getQueue(groups, 1));
+  mvprintw(0,0, "%s", getQueue(groups, 0));
+  mvprintw(13,0, "%s", getQueue(groups, 1));
+  refresh();
+  while(posx <= strlen("______________________________________________________________________________________________________________") - 3) {
+    // mvprintw(1,0, "______________________________________________________________________________________________________________");	
+    // mvprintw(3,posy, "                  ~                     ~                     ~                         ~                     ");
+    wclear(boatWin);
+    mvwprintw(boatWin, 0,posx, "%s", boat);
+    wrefresh(boatWin);
+    // mvprintw(6,!posy, "                  ~                     ~                     ~                         ~                     ");
+    // mvprintw(7,0, "______________________________________________________________________________________________________________");
     currTime = time(NULL);
-    if (currTime - oldTime == 1) {
-      oldTime = currTime;
-      posy = !posy;
-    }
+    // if (currTime - oldTime == 1) {
+    //   oldTime = currTime;
+    //   posy = !posy;
+    // }
     posx++;	
     usleep(50000);
-    refresh();
-    clear();
+    // clear();
   }
   refresh();
   endwin();
@@ -99,6 +102,22 @@ int formQueue(){
 }
 
 int main(){
-  runBoat();
+  // runBoat();
+  initscr();	
+  WINDOW *border = newwin(15, 150, 2, 0);
+  WINDOW *waves = newwin(7, 150, 4, 0);
+  WINDOW *boat = newwin(1, 150, 7, 0);
+
+  refresh();
+  mvwprintw(border, 0, 0, "______________________________________________________________________________________________________________");
+  mvwprintw(border, 10, 0, "______________________________________________________________________________________________________________");
+  wrefresh(border);
+  sleep(1); 
+  mvwprintw(waves, 1, 0, "                    ~                     ~                     ~                         ~                   ");
+  mvwprintw(waves, 6, 0, "                  ~                     ~                     ~                         ~                     ");
+  wrefresh(waves);
+  sleep(3);
+  runBoat(boat);
+  endwin();
   return 0;
 }
