@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MAX_NUM_PERSON_THREADS 20
+#define MAX_NUM_PERSON_THREADS 40
 extern Queue* person_threads;
 
 // thread responsible for taking people out of the waiting queue
