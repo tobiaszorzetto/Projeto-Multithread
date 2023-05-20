@@ -18,12 +18,11 @@ void* t_manage_groups_queue(void* args){
         sem_wait(&(global_state->groups_queue_sem));
         Group* g = dequeue_publisher_wrapper(global_state->groups_queue,\
                                               global_state->groups_queue_publisher);
-        
+                                
         for(int i=0; i<g->size; i++){
             Person* p = g->participants[i];
             sem_post(&(p->system_permission));
         }
-
         pthread_barrier_wait(&(g->barrier));
         delete_group(g);
     }

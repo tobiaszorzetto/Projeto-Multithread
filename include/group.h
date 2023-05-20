@@ -8,9 +8,11 @@ typedef struct{
     Person**participants;
     int size;
     int i;
+    int id;
     sem_t system_permission;
     pthread_barrier_t barrier;
 }Group;
+extern int last_id;
 
 Group* new_group(int size);
 

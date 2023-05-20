@@ -1,5 +1,49 @@
 #include "animation.h"
 
+void animation_setup(){
+    initscr();
+    curs_set(0);
+    initializeWindows();
+}
+
+void animation_subscribe(){
+     for(int i=0; i<global_state->num_groups; i++){
+        subscribe(global_state->individuals_queue_publishers[i], individuals_queue);
+    }
+    subscribe(global_state->groups_queue_publisher, groups_queue);
+}
+
+void individuals_queue(void* args){
+    Queue_change* q_c = args;
+    if(q_c->diff == 1){
+        drawQueue();
+    }
+    else{
+        drawQueue();
+    }
+}
+
+void groups_queue(void* args){
+    Queue_change* q_c = args;
+    if(q_c->diff == 1){
+        drawGroupsQueue();
+    }
+    else{
+        sleep(2);
+        runBoat(q_c->diff_elem);
+    }
+}
+
+void initializeWindows() {
+    drawRiverMargins();
+    drawWaves();
+    global_state->windows->boatWin = newwin(1, WIN_WIDTH, (BOT_MARGIN_POS+TOP_MARGIN_POS)/2, 0);
+    global_state->windows->groupsQueueWin = newwin(1, WIN_WIDTH, BOT_MARGIN_POS + 1, 0);
+    global_state->windows->individualsQueueWin = newwin(20, WIN_WIDTH, BOT_MARGIN_POS + 3, 0);
+    refresh();
+}
+
+
 void *moveWaves() {
     int posx_wave = 0;
     time_t oldTime = time(NULL), currTime;
@@ -40,19 +84,37 @@ void drawWaves() {
     wrefresh(global_state->windows->botWaves);
 }
 
-void initializeWindows() {
-    drawRiverMargins();
-    drawWaves();
-    global_state->windows->boatWin = newwin(1, WIN_WIDTH, (BOT_MARGIN_POS+TOP_MARGIN_POS)/2, 0);
-    global_state->windows->individualsQueueWin = newwin(20, WIN_WIDTH, BOT_MARGIN_POS + 2, 0);
-    refresh();
-}
-
 void drawQueue() {
     for(int i = 0; i < global_state->num_groups; i++){   
         mvwprintw(global_state->windows->individualsQueueWin, i, 0, "%s", getQueue(i));
     }
     wrefresh(global_state->windows->individualsQueueWin);
+}
+
+void drawGroupsQueue() {
+    wclear(global_state->windows->groupsQueueWin);
+    mvwprintw(global_state->windows->groupsQueueWin, 0, 0, "%s", getGroupsQueue());
+    wrefresh(global_state->windows->groupsQueueWin);
+}
+
+char* getGroupsQueue() {
+    char typeChar = 'A';
+    
+    char *fila = (char *)malloc(MAX_BOAT_SIZE);
+    for (int i = 0; i < MAX_BOAT_SIZE; i++)
+    {
+        fila[i] = ' ';
+    }
+
+    for (int i = 0; i < global_state->groups_queue->size; i++)
+    {
+        fila[i*(global_state->group_size + 1)] = '|';
+        Group* g = (global_state->groups_queue->items[i+global_state->groups_queue->front]);
+        for (int j = 0; j < global_state->group_size; j++) {
+            fila[i*5+j+1] = g->participants[j]->type + typeChar;
+        }
+    }
+    return fila;
 }
 
 char *getBoat(Group* g)
@@ -95,27 +157,21 @@ char* getQueue(int type)
     }
     return fila;
 }
-// //   O
-// //  /|\H
-// //  /
+
+
 void runBoat(Group* g)
 {
     int posx = 0;
     char *boat = getBoat(g);
 
-    while (posx != strlen("______________________________________________________________________________________________________________") - 3)
+    while (posx != MARGIN_LEN - (global_state->group_size + 2))
     {
         mvwprintw(global_state->windows->boatWin, 0, posx, "%s", boat);
         wrefresh(global_state->windows->boatWin);
-        // wclear(global_state->windows->individualsQueueWin);
-        // // for(int i = 0; i < global_state->num_groups; i++){   
-        // //     mvwprintw(global_state->windows->individualsQueueWin, i, 0, "%s", getQueue(i));
-        // // }
-        // wrefresh(global_state->windows->individualsQueueWin);
-        
         posx++;
         usleep(50000);
         wclear(global_state->windows->boatWin);
+        drawGroupsQueue();
     }
     wrefresh(global_state->windows->boatWin);
 }

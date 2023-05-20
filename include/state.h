@@ -13,6 +13,7 @@ typedef struct {
     WINDOW *botWaves;
     WINDOW *boatWin;
     WINDOW *individualsQueueWin;
+    WINDOW *groupsQueueWin;
 } Windows;
 
 typedef struct{
