@@ -51,4 +51,4 @@ e roda-lo com o comando:
 
 ## Requisitos
 
-É previsto que o programa seja rodado em um ambiente linux. Para compilar o código é necessario instalar a biblioteca 'ncurses'
+É previsto que o programa seja rodado em um ambiente linux. Além disso, para compilar o código, é necessario instalar a biblioteca 'ncurses'
