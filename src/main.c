@@ -6,8 +6,12 @@
 #include "animation.h"
 #include <unistd.h>
 
+#define BOAT_SIZE 6
+#define NUM_GROUPS 2
+
+
 int main() {
-	init_State(6,2,0.5, 0.5);
+	init_State(BOAT_SIZE,NUM_GROUPS,0.5, 0.5);
 
     animation_setup();
 	init_threads_infrastructure();
