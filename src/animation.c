@@ -47,7 +47,9 @@ void initializeWindows() {
 void *moveWaves() {
     int posx_wave = 0;
     time_t oldTime = time(NULL), currTime;
-    char waves[] = "                  ~                     ~                     ~                         ~                     ";
+    // char waves[] = "                  ~                     ~                     ~                         ~                     ";
+    char waves[] = "               ^^^^^^               ^^^^^^               ^^^^^^                   ^^^^^^                  ";
+
     while(1) {
         currTime = time(NULL);
         if (currTime - oldTime == 1)
@@ -74,11 +76,12 @@ void drawRiverMargins() {
 }
 
 void drawWaves() {
-    global_state->windows->topWaves = newwin(1, WIN_WIDTH, TOP_MARGIN_POS+2, 0);
+    global_state->windows->topWaves = newwin(1, WIN_WIDTH, TOP_MARGIN_POS+3, 0);
     global_state->windows->botWaves = newwin(1, WIN_WIDTH, BOT_MARGIN_POS-2, 0);
     refresh();
-    char waves[] = "                  ~                     ~                     ~                         ~                     ";
-    mvwprintw(global_state->windows->topWaves, 0, 0, "%s", waves);
+    // char waves[] = "                  ~                     ~                     ~                         ~                     ";
+    char waves[] = "               ^^^^^^               ^^^^^^               ^^^^^^                   ^^^^^^                  ";
+    mvwprintw(global_state->windows->topWaves, 0, 1, "%s", waves);
     mvwprintw(global_state->windows->botWaves, 0, 0, "%s", waves);
     wrefresh(global_state->windows->topWaves);
     wrefresh(global_state->windows->botWaves);
